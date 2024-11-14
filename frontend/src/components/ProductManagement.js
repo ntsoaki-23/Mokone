@@ -1,7 +1,6 @@
 // src/components/ProductManagement.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const ProductManagement = ({ setProducts }) => { // Receive setProducts from App
   const [products, setLocalProducts] = useState([]);
@@ -21,9 +20,10 @@ const ProductManagement = ({ setProducts }) => { // Receive setProducts from App
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
-      setLocalProducts(response.data);
-      setProducts(response.data); // Update shared products state
+      const response = await fetch('http://localhost:5000/api/products');
+      const data = await response.json();
+      setLocalProducts(data);
+      setProducts(data); // Update shared products state
     } catch (err) {
       console.error('Error fetching products:', err);
     }
@@ -36,12 +36,24 @@ const ProductManagement = ({ setProducts }) => { // Receive setProducts from App
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
-      if (editingProduct) {
-        await axios.put(`http://localhost:5000/api/products/${editingProduct.id}`, newProduct);
-        setEditingProduct(null);
-      } else {
-        await axios.post('http://localhost:5000/api/products', newProduct);
+      const method = editingProduct ? 'PUT' : 'POST';
+      const url = editingProduct
+        ? `http://localhost:5000/api/products/${editingProduct.id}`
+        : 'http://localhost:5000/api/products';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add/update product');
       }
+      
+      setEditingProduct(null);
       fetchProducts();
       setNewProduct({ name: '', description: '', price: '', quantity: '' });
       setError('');
@@ -58,7 +70,14 @@ const ProductManagement = ({ setProducts }) => { // Receive setProducts from App
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+      
       fetchProducts();
     } catch (err) {
       console.error('Error deleting product:', err);
