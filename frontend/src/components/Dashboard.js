@@ -2,6 +2,12 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductBarChart from './ProductBarChart';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import background from '../assets/background.jpg';
+import eggs from '../assets/eggs.jpeg';
+import kfc from '../assets/KFC.jpeg';
+import biscuits from '../assets/Biscuits.jpeg'; // Import the carousel styles
 
 const Dashboard = ({ products }) => {
   const navigate = useNavigate();
@@ -16,10 +22,13 @@ const Dashboard = ({ products }) => {
     navigate('/login'); // Redirect to login after logout
   };
 
+  // Sample image array for the carousel
+  const images = [background, eggs, kfc, biscuits];
+
   return (
     <div className="container">
-       <h2>Dashboard</h2>
-     <header className="header"> 
+      <h2>Dashboard</h2>
+      <header className="header">
         <nav className="navigation">
           <Link to="/products" style={{ marginRight: '15px' }}>Product Management</Link>
           <Link to="/users" style={{ marginRight: '15px' }}>User Management</Link>
@@ -55,6 +64,17 @@ const Dashboard = ({ products }) => {
             </table>
           </div>
         )}
+      </section>
+
+      {/* Image Carousel */}
+      <section style={{ marginTop: '20px' }}>
+        <Carousel autoPlay interval={3000} infiniteLoop showThumbs={false} showStatus={false}>
+          {images.map((image, index) => (
+            <div key={index}>
+              <img src={image} alt={`Slide ${index + 1}`} style={{ maxHeight: '400px', objectFit: 'cover' }} />
+            </div>
+          ))}
+        </Carousel>
       </section>
     </div>
   );
